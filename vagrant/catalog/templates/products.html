@@ -15,6 +15,11 @@
 
 <p> {{i.price}} </p>
 
+<a href='{{url_for('editProductItem', ProductCatagory_id = ProductCatagory.id, Product_id = i.id) }}'>Edit</a>
+
+</br>
+<a href = '{{url_for('deleteProductItem', ProductCatagory_id = ProductCatagory.id, Product_id = i.id ) }}'>Delete</a>
+
 </div>
 
 
