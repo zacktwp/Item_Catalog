@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
@@ -14,17 +14,10 @@ session = DBSession()
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/')
 def ProductCat(ProductCatagory_id):
     product_cat = session.query(ProductCatagory).filter_by(id=ProductCatagory_id).one()
-    prod = session.query(Product).filter_by(ProductCatagory_id=ProductCatagory.id)
-    output = ''
-    for i in prod:
-        output += i.name
-        output += '</br>'
-        output += i.price
-        output += '</br>'
-        output += i.description
-    return output
+    items = session.query(Product).filter_by(ProductCatagory_id=product_cat.id)
+    return render_template('products.html', ProductCatagory=product_cat, items=items)
 
-# Task 1: Create route for newMenuItem function here
+# Task 1: Creae route for newMenuItem function here
 
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/new/')
 def newProductItem(ProductCatagory_id):
