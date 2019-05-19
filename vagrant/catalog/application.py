@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
@@ -19,9 +19,16 @@ def ProductCat(ProductCatagory_id):
 
 # Task 1: Creae route for newMenuItem function here
 
-@app.route('/ProductCatagory/<int:ProductCatagory_id>/new/')
+@app.route('/ProductCatagory/<int:ProductCatagory_id>/new/', methods=['GET', 'POST'])
 def newProductItem(ProductCatagory_id):
-    return "page to create a new menu item. Task 1 complete!"
+    if request.method == 'POST':
+        newItem = Product(
+            name=request.form['name'], ProductCatagory_id=ProductCatagory_id)
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('ProductCat', ProductCatagory_id=ProductCatagory_id))
+    else:
+        return render_template('newproductitem.html', ProductCatagory_id=ProductCatagory_id)
 
 # Task 2: Create route for editMenuItem function here
 

@@ -4,6 +4,7 @@
 
 <h1>{{ProductCatagory.name}}</h1>
 
+<a href='{{url_for('newProductItem', ProductCatagory_id = ProductCatagory.id) }}'>New_Item</a>
 
 {% for i in items %}
 
