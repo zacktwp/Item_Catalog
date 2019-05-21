@@ -26,6 +26,17 @@ class Product(Base):
     ProductCatagory = relationship(ProductCatagory)
 
 
+    @property
+    def serialize(self):
+
+        return {
+            'name': self.name,
+            'description': self.description,
+            'id': self.id,
+            'price': self.price,
+        }
+
+
 engine = create_engine('sqlite:///Product.db')
 
 
