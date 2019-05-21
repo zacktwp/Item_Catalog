@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
@@ -14,8 +14,9 @@ session = DBSession()
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/')
 def ProductCat(ProductCatagory_id):
     product_cat = session.query(ProductCatagory).filter_by(id=ProductCatagory_id).one()
-    items = session.query(Product).filter_by(ProductCatagory_id=product_cat.id)
-    return render_template('products.html', ProductCatagory=product_cat, items=items)
+    items = session.query(Product).filter_by(ProductCatagory_id=ProductCatagory_id)
+    return render_template(
+        'products.html', ProductCatagory=product_cat, ProductCatagory_id=ProductCatagory_id, items=items)
 
 
 # Task 1: Creae route for newMenuItem function here
@@ -27,6 +28,7 @@ def newProductItem(ProductCatagory_id):
             name=request.form['name'], ProductCatagory_id=ProductCatagory_id)
         session.add(newItem)
         session.commit()
+        flash("new menu item created!")
         return redirect(url_for('ProductCat', ProductCatagory_id=ProductCatagory_id))
     else:
         return render_template('newproductitem.html', ProductCatagory_id=ProductCatagory_id)
@@ -71,5 +73,6 @@ def deleteProductItem(ProductCatagory_id, Product_id):
         return render_template('deleteproductitem.html', item=itemToDelete)
 
 if __name__ == '__main__':
+    app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
