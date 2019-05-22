@@ -29,4 +29,17 @@ Product2 = Product(name="Tuna", description="Delicious Blue Finn Tuna, extra Dol
 session.add(Product2)
 session.commit()
 
+# Products for Groceries
+ProductCatagory2 = ProductCatagory(name="Cleaning")
+
+session.add(ProductCatagory2)
+session.commit()
+
+Product2 = Product(name="Mop", description="cleans the toughest staines",
+                    price = "1.23", ProductCatagory=ProductCatagory2)
+session.add(Product2)
+session.commit()
+
+
+
 print ("added products to DB!")

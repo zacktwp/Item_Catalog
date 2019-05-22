@@ -6,7 +6,7 @@
 
 <body>
 
-<h1>{{ProductCatagory.name}}</h1>
+<h1>{{productcatagory.name}}</h1>
 
 <!--MESSAGE FLASHING EXAMPLE -->
 {% with messages = get_flashed_messages() %}
@@ -20,7 +20,7 @@
 {% endif %}
 {% endwith %}
 
-<a href='{{url_for('newProductItem', ProductCatagory_id = ProductCatagory.id) }}'>New_Item</a>
+<a href='{{url_for('newProductItem', ProductCatagory_id = productcatagory.id) }}'>New_Item</a>
 
 {% for i in items %}
 
@@ -32,10 +32,10 @@
 
 <p> {{i.price}} </p>
 
-<a href='{{url_for('editProductItem', ProductCatagory_id = ProductCatagory.id, Product_id = i.id) }}'>Edit</a>
+<a href='{{url_for('editProductItem', ProductCatagory_id = productcatagory.id, Product_id = i.id) }}'>Edit</a>
 
 </br>
-<a href = '{{url_for('deleteProductItem', ProductCatagory_id = ProductCatagory.id, Product_id = i.id ) }}'>Delete</a>
+<a href = '{{url_for('deleteProductItem', ProductCatagory_id = productcatagory.id, Product_id = i.id ) }}'>Delete</a>
 
 </div>
 
