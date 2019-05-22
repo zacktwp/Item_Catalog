@@ -23,8 +23,9 @@ def ProductCatJSON(ProductCatagory_id):
 def ProductCat(ProductCatagory_id):
     productcatagory = session.query(ProductCatagory).filter_by(id=ProductCatagory_id).one()
     items = session.query(Product).filter_by(ProductCatagory_id=ProductCatagory_id)
+    catagories = session.query(ProductCatagory).all()
     return render_template(
-        'products.html', productcatagory=productcatagory, ProductCatagory_id=ProductCatagory_id, items=items)
+        'products.html', productcatagory=productcatagory, ProductCatagory_id=ProductCatagory_id, items=items, catagories=catagories)
 
 
 # Task 1: Creae route for newMenuItem function here

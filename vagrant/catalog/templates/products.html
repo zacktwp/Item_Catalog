@@ -20,6 +20,15 @@
 {% endif %}
 {% endwith %}
 
+{% for i in catagories %}
+
+<div>
+
+<p>{{i.name}}</p>
+
+</div>
+{% endfor %}
+
 <a href='{{url_for('newProductItem', ProductCatagory_id = productcatagory.id) }}'>New_Item</a>
 
 {% for i in items %}
