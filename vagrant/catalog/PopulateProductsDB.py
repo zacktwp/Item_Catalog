@@ -24,7 +24,7 @@ ProductCatagory1 = ProductCatagory(name="Groceries")
 session.add(ProductCatagory1)
 session.commit()
 
-Product2 = Product(name="Tuna", description="Delicious Blue Fine Tuna, extra Dolphin",
+Product2 = Product(name="Tuna", description="Delicious Blue Finn Tuna, extra Dolphin",
                     price = "1.23", ProductCatagory=ProductCatagory1)
 session.add(Product2)
 session.commit()

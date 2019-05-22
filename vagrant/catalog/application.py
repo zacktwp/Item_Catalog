@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
@@ -53,6 +54,10 @@ def editProductItem(ProductCatagory_id, Product_id):
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
+        if request.form['description']:
+            editedItem.description = request.form['description']
+        if request.form['price']:
+            editedItem.price = request.form['price']
         session.add(editedItem)
         session.commit()
         return redirect(url_for('ProductCat', ProductCatagory_id=ProductCatagory_id))
