@@ -20,6 +20,7 @@ def ProductCatJSON(ProductCatagory_id):
 
 @app.route('/')
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/')
+#@app.route('/EverythingStore/')
 def ProductCat(ProductCatagory_id):
     productcatagory = session.query(ProductCatagory).filter_by(id=ProductCatagory_id).one()
     items = session.query(Product).filter_by(ProductCatagory_id=ProductCatagory_id)
@@ -43,11 +44,7 @@ def newProductItem(ProductCatagory_id):
         return render_template('newproductitem.html', ProductCatagory_id=ProductCatagory_id)
 
 # Task 2: Create route for editMenuItem function here
-'''
-@app.route('/ProductCatagory/<int:ProductCatagory_id>/<int:Product_id>/edit/')
-def editProductItem(ProductCatagory_id, Product_id):
-    return "page to edit a menu item. Task 2 complete!"
-'''
+
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/<int:Product_id>/edit',
            methods=['GET', 'POST'])
 def editProductItem(ProductCatagory_id, Product_id):
@@ -69,11 +66,7 @@ def editProductItem(ProductCatagory_id, Product_id):
             'editproductitem.html', ProductCatagory_id=ProductCatagory_id, Product_id=Product_id, item=editedItem)
 
 # Task 3: Create a route for deleteMenuItem function here
-'''
-@app.route('/ProductCatagory/<int:ProductCatagory_id>/<int:Product_id>/delete/')
-def deleteProductItem(ProductCatagory_id, Product_id):
-    return "page to delete a menu item. Task 3 complete!"
-'''
+
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/<int:Product_id>/delete',
            methods=['GET', 'POST'])
 def deleteProductItem(ProductCatagory_id, Product_id):
