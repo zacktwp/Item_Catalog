@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
 app = Flask(__name__)
@@ -27,6 +27,22 @@ def ProductCat(ProductCatagory_id):
     catagories = session.query(ProductCatagory).all()
     return render_template(
         'products.html', productcatagory=productcatagory, ProductCatagory_id=ProductCatagory_id, items=items, catagories=catagories)
+
+
+
+@app.route('/EverythingStore/')
+def home():
+    catagories = session.query(ProductCatagory).all()
+    return render_template(
+        'home.html', catagories=catagories)
+
+@app.route('/EverythingStore/<category_name>/items')
+def allCategoryItems(category_name):
+  categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
+  selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
+  items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
+  return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
+
 
 
 # Task 1: Creae route for newMenuItem function here
