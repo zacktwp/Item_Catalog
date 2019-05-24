@@ -43,7 +43,11 @@ def allCategoryItems(category_name):
   items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
   return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
 
-
+@app.route('/EverythingStore/<category_name>/<item_name>')
+def showItem(category_name, item_name):
+  category = session.query(ProductCatagory).filter_by(name=category_name).one()
+  item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
+  return render_template('description.html', item=item)
 
 # Task 1: Creae route for newMenuItem function here
 

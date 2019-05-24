@@ -8,12 +8,12 @@
 
 <h1>Everything Store</h1>
 
-{% for i in catagories %}
+{% for cat in catagories %}
 
 <div>
 
-<p><button>{{i.name}}</button></p>
-<a href='{{url_for('allCategoryItems', category_name = i.name) }}'>{{i.name}}</a>
+
+<a href='{{url_for('allCategoryItems', category_name = cat.name) }}'>{{cat.name}}</a>
 
 </div>
 {% endfor %}
@@ -21,7 +21,7 @@
 {% for i in items %}
 <div>
 <p>{{i.name}}</p>
-
+<a href='{{url_for('showItem', category_name=i.ProductCatagory.name, item_name=i.name) }}'>{{i.name}}</a>
 
 
 </div>
