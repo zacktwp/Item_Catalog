@@ -43,8 +43,7 @@ def showLogin():
 @app.route('/EverythingStore/')
 def home():
     catagories = session.query(ProductCatagory).all()
-    return render_template(
-        'home.html', catagories=catagories)
+    return render_template('home.html', catagories=catagories)
 
 @app.route('/EverythingStore/<category_name>/items')
 def allCategory(category_name):
