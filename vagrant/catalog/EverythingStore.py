@@ -22,16 +22,28 @@ def home():
 
 @app.route('/EverythingStore/<category_name>/items')
 def allCategory(category_name):
-  categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
-  selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
-  items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
-  return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
+    categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
+    selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
+    items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
+    return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
 
 @app.route('/EverythingStore/<category_name>/<item_name>')
 def ProdDesc(category_name, item_name):
-  category = session.query(ProductCatagory).filter_by(name=category_name).one()
-  item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
-  return render_template('description.html', item=item)
+    category = session.query(ProductCatagory).filter_by(name=category_name).one()
+    item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
+    return render_template('description.html', item=item)
+
+# Add new category
+@app.route('/EverythingStore/newcategory', methods=['GET','POST'])
+def addCategory():
+    if request.method == 'POST':
+        newCategory = ProductCatagory(name=request.form['name'])
+        session.add(newCategory)
+        session.commit()
+        flash("You've successfully added new category!")
+        return redirect(url_for('home'))
+    else:
+        return render_template('newCategory.html', )
 
 if __name__ == '__main__':
 
