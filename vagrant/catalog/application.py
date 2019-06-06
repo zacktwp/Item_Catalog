@@ -3,6 +3,9 @@ from datetime import datetime
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
+from flask import session as login_session
+import random
+import string
 app = Flask(__name__)
 
 engine = create_engine('sqlite:///Product.db')
@@ -29,6 +32,13 @@ def ProductCat(ProductCatagory_id):
         'products.html', productcatagory=productcatagory, ProductCatagory_id=ProductCatagory_id, items=items, catagories=catagories)
 
 
+@app.route('/login')
+def showLogin():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in xrange(32))
+    login_session['state'] = state
+    return render_template('login.html')
+
 
 @app.route('/EverythingStore/')
 def home():
@@ -37,20 +47,32 @@ def home():
         'home.html', catagories=catagories)
 
 @app.route('/EverythingStore/<category_name>/items')
-def allCategoryItems(category_name):
+def allCategory(category_name):
   categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
   selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
   items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
   return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
 
 @app.route('/EverythingStore/<category_name>/<item_name>')
-def showItem(category_name, item_name):
+def ProdDesc(category_name, item_name):
   category = session.query(ProductCatagory).filter_by(name=category_name).one()
   item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
   return render_template('description.html', item=item)
 
-# Task 1: Creae route for newMenuItem function here
+@app.route('/EverythingStore/new/', methods=['GET', 'POST'])
+def newProductItem():
+    if request.method == 'POST':
+        newItem = Product(name=request.form['name'])
+        session.add(newItem)
+        session.commit()
+        flash("new menu item created!")
+        return redirect(url_for('home'))
+    else:
+        return render_template('newproductitem.html')
 
+
+# Task 1: Creae route for newMenuItem function here
+'''
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/new/', methods=['GET', 'POST'])
 def newProductItem(ProductCatagory_id):
     if request.method == 'POST':
@@ -62,7 +84,7 @@ def newProductItem(ProductCatagory_id):
         return redirect(url_for('ProductCat', ProductCatagory_id=ProductCatagory_id))
     else:
         return render_template('newproductitem.html', ProductCatagory_id=ProductCatagory_id)
-
+'''
 # Task 2: Create route for editMenuItem function here
 
 @app.route('/ProductCatagory/<int:ProductCatagory_id>/<int:Product_id>/edit',

@@ -1,0 +1,36 @@
+<html>
+
+<head>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+	</head>
+
+<body>
+
+<h1>Everything Store</h1>
+
+{% for catagory in catagories %}
+
+<div>
+
+
+<a href='{{url_for('allCategoryItems', category_name = category.name) }}'>{{category.name}}</a>
+
+</div>
+{% endfor %}
+
+
+
+{% for item in items %}
+<div>
+
+<a href='{{url_for('showItem', category_name=item.ProductCatagory.name, item_name=item.name) }}'>{{item.name}}</a>
+
+
+</div>
+
+{% endfor %}
+
+
+</body>
+
+</html>
