@@ -8,7 +8,7 @@ import random
 import string
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///Product.db')
+engine = create_engine('sqlite:///Product.db', pool_pre_ping=True)
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -18,6 +18,7 @@ session = DBSession()
 @app.route('/EverythingStore/')
 def home():
     catagories = session.query(ProductCatagory).all()
+    items = session.query(Product).all()
     return render_template('home.html', catagories=catagories)
 
 @app.route('/EverythingStore/<category_name>/items')
@@ -44,6 +45,25 @@ def addCategory():
         return redirect(url_for('home'))
     else:
         return render_template('newCategory.html', )
+
+# Add new item to a category
+@app.route('/EverythingStore/additem', methods=['GET','POST'])
+def addItem():
+    categories = session.query(ProductCatagory).all()
+    if request.method == 'POST':
+        itemName = request.form['name']
+        itemDescription = request.form['description']
+        itemCategory = session.query(ProductCatagory).filter_by(name=request.form['ProductCatagory']).one()
+        if itemName != '':
+            print("item name %s" % itemName)
+            addingItem = Product(name=itemName, description=itemDescription, ProductCatagory=itemCategory)
+            session.add(addingItem)
+            session.commit()
+            return redirect(url_for('home'))
+        else:
+            return render_template('addItem.html', categories=categories)
+    else:
+        return render_template('addItem.html', categories=categories)
 
 if __name__ == '__main__':
 

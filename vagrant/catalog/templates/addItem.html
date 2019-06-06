@@ -1,0 +1,50 @@
+<html>
+
+<head>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+	</head>
+
+<body>
+
+<h1>Everything Store</h1>
+
+<div>
+      <div>
+          <div>
+              <form method="post">
+                  <div class="form-group row">
+                    <h2>Adding New Item</h2>
+                    <br>
+                      <label for="name" class="col">Title:</label>
+                      <input type="text" maxlength="50" class="form-control" id="name" name="name"
+                             placeholder="Title of the item">
+                      <br>
+                      <label for="description">Description:</label>
+                      <textarea class="form-control" maxlength="1000" rows="5" id="description" name="description"
+                            placeholder="Description of the item"></textarea>
+
+                      <br>
+                      <label for="ProductCatagory">Category:</label>
+                      <select class="form-control" id="ProductCatagory" name="ProductCatagory">
+                          {% for category in categories %}
+                              <option>{{category.name}}</option>
+                          {% endfor %}
+                      </select>
+                      <br>
+                      <button type="submit" class="btn btn-default">
+                      <span class="btn">Create</span>
+                      </button>
+                      <a href="{{url_for('home')}}">
+                          <button type="button" class="btn btn-default">
+                              <span class="btn">Cancel</span>
+                          </button>
+                      </a>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+
+</body>
+
+</html>
