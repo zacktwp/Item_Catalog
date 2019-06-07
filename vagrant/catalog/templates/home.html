@@ -33,30 +33,12 @@
 {% for i in items %}
 <div>
 <a href='{{url_for('ProdDesc', category_name=i.ProductCatagory.name, item_name=i.name) }}'>{{i.name}}</a>
-
+<a href="{{url_for('editItem', category_name=i.ProductCatagory.name, item_name=i.name)}}">
+	<button type="button" class="tn btn-outline-success btn-sm">Edit Item</button>
 
 </div>
 {% endfor %}
 
-<div class="row">
-            {% for item in items %}
-              <div class="col-sm-4 col-lg-4 col-md-4">
-                <div class="card">
-
-
-                  <h4 class="text-center">{{item.name}}</h4>
-                  <div class="block-inline">
-
-                    <a href="{{url_for('editItem', category_name=item.ProductCatagory.name, item_name=item.name)}}">
-											<button type="button" class="tn btn-outline-success btn-sm">Edit Item</button>
-										</a>
-
-                  </div>
-
-                </div>
-              </div>
-            {% endfor %}
-          </div>
 
 
 </body>
