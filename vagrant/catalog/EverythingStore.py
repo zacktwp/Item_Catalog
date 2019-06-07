@@ -65,6 +65,25 @@ def addItem():
     else:
         return render_template('addItem.html', categories=categories)
 
+# Edit  item to a category
+@app.route('/EverythingStore/<category_name>/<item_name>/edit', methods=['GET','POST'])
+def editItem(category_name, item_name):
+    categories = session.query(ProductCatagory)
+    editingItemCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
+    editingItem = session.query(Product).filter_by(name=item_name, ProductCatagory=editingItemCategory).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editingItem.name = request.form['name']
+        if request.form['description']:
+            editingItem.description = request.form['description']
+        if request.form['ProductCatagory']:
+            editingItem.category = session.query(ProductCatagory).filter_by(name=request.form['ProductCatagory']).one()
+        session.add(editingItem)
+        session.commit()
+        return redirect(url_for('ProdDesc', category_name=editingItemCategory.name, item_name=editingItem.name))
+    else:
+        return render_template('editItem.html', categories=categories, editingItemCategory=editingItemCategory, item=editingItem)
+
 if __name__ == '__main__':
 
     app.secret_key = 'super_secret_key'
