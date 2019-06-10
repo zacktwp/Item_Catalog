@@ -46,6 +46,19 @@ def addCategory():
     else:
         return render_template('newCategory.html', )
 
+# Delete category
+@app.route('/EverythingStore/<ProductCatagory_id>/delete',
+           methods=['GET', 'POST'])
+def deleteCatagory(ProductCatagory_id):
+
+    categoryToDelete = session.query(ProductCatagory).filter_by(name=ProductCatagory_id).one()
+    # Delete category from the database
+    if request.method == 'POST':
+        session.delete(categoryToDelete)
+        session.commit()
+        return redirect(url_for('home'))
+    return render_template('deleteCatagory.html', category=categoryToDelete)
+
 # Add new item to a category
 @app.route('/EverythingStore/additem', methods=['GET','POST'])
 def addItem():
@@ -83,6 +96,8 @@ def editItem(category_name, item_name):
         return redirect(url_for('ProdDesc', category_name=editingItemCategory.name, item_name=editingItem.name))
     else:
         return render_template('editItem.html', categories=categories, editingItemCategory=editingItemCategory, item=editingItem)
+
+
 
 if __name__ == '__main__':
 
