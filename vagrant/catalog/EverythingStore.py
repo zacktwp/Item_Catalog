@@ -151,7 +151,12 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', state=state)
 
-
+# API endpoint for Everyting Store
+@app.route('/EverythingStore/json')
+def EverythingStoreJSON():
+  catagories = session.query(ProductCatagory).all()
+  items = session.query(Product).all()
+  return jsonify(Catagories = [c.serialize for c in catagories], Items = [i.serialize for i in items])
 
 # Everything Store home page
 @app.route('/EverythingStore/')
@@ -180,7 +185,7 @@ def addCategory():
 
     if 'username' not in login_session:
         return redirect('/signin')
-        
+
     if request.method == 'POST':
         newCategory = ProductCatagory(name=request.form['name'])
         session.add(newCategory)
