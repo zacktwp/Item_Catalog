@@ -177,6 +177,10 @@ def ProdDesc(category_name, item_name):
 # Add new category
 @app.route('/EverythingStore/newcategory', methods=['GET','POST'])
 def addCategory():
+
+    if 'username' not in login_session:
+        return redirect('/signin')
+        
     if request.method == 'POST':
         newCategory = ProductCatagory(name=request.form['name'])
         session.add(newCategory)
