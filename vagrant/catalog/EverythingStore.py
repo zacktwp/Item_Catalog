@@ -6,6 +6,7 @@ from database_setup import Base, ProductCatagory, Product
 from flask import session as login_session
 import random
 import string
+from sqlalchemy import exc
 
 # IMPORTS FOR THIS STEP
 from oauth2client.client import flow_from_clientsecrets
@@ -161,23 +162,32 @@ def EverythingStoreJSON():
 # Everything Store home page
 @app.route('/EverythingStore/')
 def home():
-    catagories = session.query(ProductCatagory).all()
-    items = session.query(Product).all()
-    user = login_session.get('username', None)
-    return render_template('home.html', catagories=catagories,user=user)
+    try:
+        catagories = session.query(ProductCatagory).all()
+        items = session.query(Product).all()
+        user = login_session.get('username', None)
+        return render_template('home.html', catagories=catagories,user=user)
+    except exc.SQLAlchemyError:
+        exit(1)
 
 @app.route('/EverythingStore/<category_name>/items')
 def allCategory(category_name):
-    categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
-    selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
-    items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
-    return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
+    try:
+        categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
+        selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
+        items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
+        return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
+    except exc.SQLAlchemyError:
+        redirect(url_for('home'))
 
 @app.route('/EverythingStore/<category_name>/<item_name>')
 def ProdDesc(category_name, item_name):
-    category = session.query(ProductCatagory).filter_by(name=category_name).one()
-    item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
-    return render_template('description.html', item=item)
+    try:
+        category = session.query(ProductCatagory).filter_by(name=category_name).one()
+        item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
+        return render_template('description.html', item=item)
+    except exc.SQLAlchemyError:
+        redirect(url_for('home'))
 
 # Add new category
 @app.route('/EverythingStore/newcategory', methods=['GET','POST'])
@@ -187,13 +197,17 @@ def addCategory():
         return redirect('/signin')
 
     if request.method == 'POST':
-        newCategory = ProductCatagory(name=request.form['name'])
-        session.add(newCategory)
-        session.commit()
-        flash("You've successfully added new category!")
-        return redirect(url_for('home'))
+        try:
+            newCategory = ProductCatagory(name=request.form['name'])
+            session.add(newCategory)
+            session.commit()
+            flash("You've successfully added new category!")
+            return redirect(url_for('home'))
+        except exc.SQLAlchemyError:
+            return redirect(url_for('home'))
     else:
         return render_template('newCategory.html', )
+
 
 # Delete category
 @app.route('/EverythingStore/<ProductCatagory_id>/delete',
