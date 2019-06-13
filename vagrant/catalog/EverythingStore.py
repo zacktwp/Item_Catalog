@@ -149,14 +149,17 @@ def showLogin():
                     for x in xrange(32))
     login_session['state'] = state
     # return "The current session state is %s" % login_session['state']
-    return render_template('login.html', STATE=state)
+    return render_template('login.html', state=state)
+
+
 
 # Everything Store home page
 @app.route('/EverythingStore/')
 def home():
     catagories = session.query(ProductCatagory).all()
     items = session.query(Product).all()
-    return render_template('home.html', catagories=catagories)
+    user = login_session.get('username', None)
+    return render_template('home.html', catagories=catagories,user=user)
 
 @app.route('/EverythingStore/<category_name>/items')
 def allCategory(category_name):
