@@ -180,10 +180,19 @@ def home():
 @app.route('/EverythingStore/<category_name>/items')
 def allCategory(category_name):
     try:
-        categories = session.query(ProductCatagory).order_by(asc(ProductCatagory.name))
-        selectedCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
-        items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
-        return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
+        categories = session.query(
+                                   ProductCatagory
+                                   ).order_by(asc(ProductCatagory.name))
+        selectedCategory = session.query(
+                                         ProductCatagory
+                                         ).filter_by(name=category_name).one()
+        items = session.query(
+                              Product
+                              ).filter_by(
+                                          ProductCatagory_id=selectedCategory.id
+                                          ).order_by(asc(Product.name))
+        return render_template('home.html', categories=categories,
+                               selectedCategory=selectedCategory, items=items)
     except exc.SQLAlchemyError:
         return '<h1>database error...re-try</h1>'
 
@@ -191,8 +200,14 @@ def allCategory(category_name):
 @app.route('/EverythingStore/<category_name>/<item_name>')
 def ProdDesc(category_name, item_name):
     try:
-        category = session.query(ProductCatagory).filter_by(name=category_name).one()
-        item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
+        category = session.query(
+                                 ProductCatagory
+                                 ).filter_by(name=category_name).one()
+        item = session.query(
+                             Product
+                             ).filter_by(
+                                         name=item_name, ProductCatagory=category
+                                         ).one()
         return render_template('description.html', item=item)
     except exc.SQLAlchemyError:
         return '<h1>database error...re-try</h1>'
@@ -225,7 +240,9 @@ def deleteCatagory(ProductCatagory_id):
     if 'username' not in login_session:
         return redirect('/signin')
 
-    categoryToDelete = session.query(ProductCatagory).filter_by(name=ProductCatagory_id).one()
+    categoryToDelete = session.query(
+                                     ProductCatagory
+                                     ).filter_by(name=ProductCatagory_id).one()
     # Delete category from the database
     if request.method == 'POST':
         session.delete(categoryToDelete)
@@ -243,10 +260,16 @@ def addItem():
     if request.method == 'POST':
         itemName = request.form['name']
         itemDescription = request.form['description']
-        itemCategory = session.query(ProductCatagory).filter_by(name=request.form['ProductCatagory']).one()
+        itemCategory = session.query(
+                                     ProductCatagory
+                                     ).filter_by(
+                                                 name=request.form['ProductCatagory']
+                                                 ).one()
         if itemName != '':
             print("item name %s" % itemName)
-            addingItem = Product(name=itemName, description=itemDescription, ProductCatagory=itemCategory)
+            addingItem = Product(name=itemName,
+                                 description=itemDescription,
+                                 ProductCatagory=itemCategory)
             session.add(addingItem)
             session.commit()
             return redirect(url_for('home'))
@@ -262,15 +285,25 @@ def editItem(category_name, item_name):
     if 'username' not in login_session:
         return redirect('/signin')
     categories = session.query(ProductCatagory)
-    editingItemCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
-    editingItem = session.query(Product).filter_by(name=item_name, ProductCatagory=editingItemCategory).one()
+    editingItemCategory = session.query(
+                                        ProductCatagory
+                                        ).filter_by(name=category_name).one()
+    editingItem = session.query(
+                                Product
+                                ).filter_by(
+                                            name=item_name, ProductCatagory=editingItemCategory
+                                            ).one()
     if request.method == 'POST':
         if request.form['name']:
             editingItem.name = request.form['name']
         if request.form['description']:
             editingItem.description = request.form['description']
         if request.form['ProductCatagory']:
-            editingItem.category = session.query(ProductCatagory).filter_by(name=request.form['ProductCatagory']).one()
+            editingItem.category = session.query(
+                                                 ProductCatagory
+                                                 ).filter_by(
+                                                             name=request.form['ProductCatagory']
+                                                             ).one()
         session.add(editingItem)
         session.commit()
         return redirect(url_for('ProdDesc', category_name=editingItemCategory.name,
