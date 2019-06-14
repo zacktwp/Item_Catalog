@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template
+from flask import request, redirect, url_for, flash, jsonify
 from datetime import datetime
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
@@ -26,6 +27,7 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -79,7 +81,7 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
+        response = make_response(json.dumps('user is already connected.'),
                                  200)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -105,23 +107,25 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
+
 
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
     if access_token is None:
         print('Access Token is None')
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(json.dumps('user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     print('In gdisconnect access token is %s'), access_token
     print('User name is: ')
     print(login_session['username'])
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' \
+        % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print ('result is ')
@@ -132,13 +136,10 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-        #response = make_response(json.dumps('Successfully disconnected.'), 200)
-        #response.headers['Content-Type'] = 'application/json'
-        #return response
         flash("You are now successfully logged out.")
         return redirect(url_for('home'))
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps('Failed to revoke token', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -152,23 +153,29 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', state=state)
 
+
 # API endpoint for Everyting Store
 @app.route('/EverythingStore/json')
 def EverythingStoreJSON():
-  catagories = session.query(ProductCatagory).all()
-  items = session.query(Product).all()
-  return jsonify(Catagories = [c.serialize for c in catagories], Items = [i.serialize for i in items])
+
+    catagories = session.query(ProductCatagory).all()
+    items = session.query(Product).all()
+    return jsonify(Catagories=[c.serialize for c in catagories],
+                   Items=[i.serialize for i in items])
+
 
 # Everything Store home page
+@app.route('/')
 @app.route('/EverythingStore/')
 def home():
     try:
         catagories = session.query(ProductCatagory).all()
         items = session.query(Product).all()
         user = login_session.get('username', None)
-        return render_template('home.html', catagories=catagories,user=user)
+        return render_template('home.html', catagories=catagories, user=user)
     except exc.SQLAlchemyError:
-        exit(1)
+        return '<h1>database error...re-try</h1>'
+
 
 @app.route('/EverythingStore/<category_name>/items')
 def allCategory(category_name):
@@ -178,7 +185,8 @@ def allCategory(category_name):
         items = session.query(Product).filter_by(ProductCatagory_id=selectedCategory.id).order_by(asc(Product.name))
         return render_template('home.html', categories=categories, selectedCategory=selectedCategory, items=items)
     except exc.SQLAlchemyError:
-        redirect(url_for('home'))
+        return '<h1>database error...re-try</h1>'
+
 
 @app.route('/EverythingStore/<category_name>/<item_name>')
 def ProdDesc(category_name, item_name):
@@ -187,10 +195,11 @@ def ProdDesc(category_name, item_name):
         item = session.query(Product).filter_by(name=item_name, ProductCatagory=category).one()
         return render_template('description.html', item=item)
     except exc.SQLAlchemyError:
-        redirect(url_for('home'))
+        return '<h1>database error...re-try</h1>'
+
 
 # Add new category
-@app.route('/EverythingStore/newcategory', methods=['GET','POST'])
+@app.route('/EverythingStore/newcategory', methods=['GET', 'POST'])
 def addCategory():
 
     if 'username' not in login_session:
@@ -204,7 +213,7 @@ def addCategory():
             flash("You've successfully added new category!")
             return redirect(url_for('home'))
         except exc.SQLAlchemyError:
-            return redirect(url_for('home'))
+            return '<h1>database error...re-try</h1>'
     else:
         return render_template('newCategory.html', )
 
@@ -213,6 +222,8 @@ def addCategory():
 @app.route('/EverythingStore/<ProductCatagory_id>/delete',
            methods=['GET', 'POST'])
 def deleteCatagory(ProductCatagory_id):
+    if 'username' not in login_session:
+        return redirect('/signin')
 
     categoryToDelete = session.query(ProductCatagory).filter_by(name=ProductCatagory_id).one()
     # Delete category from the database
@@ -222,9 +233,12 @@ def deleteCatagory(ProductCatagory_id):
         return redirect(url_for('home'))
     return render_template('deleteCatagory.html', category=categoryToDelete)
 
+
 # Add new item to a category
-@app.route('/EverythingStore/additem', methods=['GET','POST'])
+@app.route('/EverythingStore/additem', methods=['GET', 'POST'])
 def addItem():
+    if 'username' not in login_session:
+        return redirect('/signin')
     categories = session.query(ProductCatagory).all()
     if request.method == 'POST':
         itemName = request.form['name']
@@ -241,9 +255,12 @@ def addItem():
     else:
         return render_template('addItem.html', categories=categories)
 
+
 # Edit  item to a category
-@app.route('/EverythingStore/<category_name>/<item_name>/edit', methods=['GET','POST'])
+@app.route('/EverythingStore/<category_name>/<item_name>/edit', methods=['GET', 'POST'])
 def editItem(category_name, item_name):
+    if 'username' not in login_session:
+        return redirect('/signin')
     categories = session.query(ProductCatagory)
     editingItemCategory = session.query(ProductCatagory).filter_by(name=category_name).one()
     editingItem = session.query(Product).filter_by(name=item_name, ProductCatagory=editingItemCategory).one()
@@ -256,15 +273,16 @@ def editItem(category_name, item_name):
             editingItem.category = session.query(ProductCatagory).filter_by(name=request.form['ProductCatagory']).one()
         session.add(editingItem)
         session.commit()
-        return redirect(url_for('ProdDesc', category_name=editingItemCategory.name, item_name=editingItem.name))
+        return redirect(url_for('ProdDesc', category_name=editingItemCategory.name,
+                                item_name=editingItem.name))
     else:
-        return render_template('editItem.html', categories=categories, editingItemCategory=editingItemCategory, item=editingItem)
-
+        return render_template('editItem.html', categories=categories,
+                               editingItemCategory=editingItemCategory, item=editingItem)
 
 
 if __name__ == '__main__':
 
     app.secret_key = 'super_secret_key'
     app.debug = True
-    threaded=True
+    threaded = True
     app.run(host='0.0.0.0', port=8000)
