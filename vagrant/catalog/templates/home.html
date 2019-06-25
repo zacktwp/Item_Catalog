@@ -43,6 +43,8 @@
 <a href='{{url_for('ProdDesc', category_name=i.ProductCatagory.name, item_name=i.name) }}'>{{i.name}}</a>
 <a href="{{url_for('editItem', category_name=i.ProductCatagory.name, item_name=i.name)}}">
 	<button type="button" class="tn btn-outline-success btn-sm">Edit Item</button>
+	<a href="{{url_for('deleteItem', category_name=i.ProductCatagory.name, item_name=i.name)}}">
+		<button type="button" class="tn btn-outline-success btn-sm">delete Item</button>
 
 </div>
 {% endfor %}

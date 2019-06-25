@@ -279,6 +279,26 @@ def addItem():
         return render_template('addItem.html', categories=categories)
 
 
+# delete  item to a category
+@app.route('/EverythingStore/<category_name>/<item_name>/delete', methods=['GET', 'POST'])
+def deleteItem(category_name, item_name):
+    if 'username' not in login_session:
+        return redirect('/signin')
+    #categories = session.query(ProductCatagory)
+    deletingItemCategory = session.query(
+                                        ProductCatagory
+                                        ).filter_by(name=category_name).one()
+    deletingItem = session.query(
+                                 Product
+                                 ).filter_by(name=item_name).one()
+    # Delete item from the database
+    if request.method == 'POST':
+        session.delete(deletingItem)
+        session.commit()
+        return redirect(url_for('home'))
+    return render_template('deleteItem.html', item=deletingItem, category_name=deletingItemCategory )
+
+
 # Edit  item to a category
 @app.route('/EverythingStore/<category_name>/<item_name>/edit', methods=['GET', 'POST'])
 def editItem(category_name, item_name):
