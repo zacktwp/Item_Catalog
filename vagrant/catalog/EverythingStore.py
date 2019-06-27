@@ -3,11 +3,12 @@ from flask import request, redirect, url_for, flash, jsonify
 from datetime import datetime
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, ProductCatagory, Product
+from database_setup import Base, ProductCatagory, Product, User
 from flask import session as login_session
 import random
 import string
 from sqlalchemy import exc
+from functools import wraps
 
 # IMPORTS FOR THIS STEP
 from oauth2client.client import flow_from_clientsecrets
@@ -101,6 +102,11 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -134,6 +140,7 @@ def gdisconnect():
         del login_session['access_token']
         del login_session['gplus_id']
         del login_session['username']
+        del login_session['user_id']
         del login_session['email']
         del login_session['picture']
         flash("You are now successfully logged out.")
@@ -142,6 +149,39 @@ def gdisconnect():
         response = make_response(json.dumps('Failed to revoke token', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
+
+# Adding primary routes.
+def login_required(f):
+    """Login decorater function."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in login_session:
+            return redirect('/home')
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def createUser(login_session):
+    newUser = User(name=login_session['username'],
+                   email=login_session['email'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return newUser.id
+
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user.id
+
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 
 # Create anti-forgery state token
@@ -215,11 +255,8 @@ def ProdDesc(category_name, item_name):
 
 # Add new category
 @app.route('/EverythingStore/newcategory', methods=['GET', 'POST'])
+@login_required
 def addCategory():
-
-    if 'username' not in login_session:
-        return redirect('/signin')
-
     if request.method == 'POST':
         try:
             newCategory = ProductCatagory(name=request.form['name'])
@@ -236,10 +273,8 @@ def addCategory():
 # Delete category
 @app.route('/EverythingStore/<ProductCatagory_id>/delete',
            methods=['GET', 'POST'])
+@login_required
 def deleteCatagory(ProductCatagory_id):
-    if 'username' not in login_session:
-        return redirect('/signin')
-
     categoryToDelete = session.query(
                                      ProductCatagory
                                      ).filter_by(name=ProductCatagory_id).one()
@@ -253,9 +288,8 @@ def deleteCatagory(ProductCatagory_id):
 
 # Add new item to a category
 @app.route('/EverythingStore/additem', methods=['GET', 'POST'])
+@login_required
 def addItem():
-    if 'username' not in login_session:
-        return redirect('/signin')
     categories = session.query(ProductCatagory).all()
     if request.method == 'POST':
         itemName = request.form['name']
@@ -265,11 +299,13 @@ def addItem():
                                      ).filter_by(
                                                  name=request.form['ProductCatagory']
                                                  ).one()
+        #itemUser = login_session['user_id']
         if itemName != '':
             print("item name %s" % itemName)
             addingItem = Product(name=itemName,
                                  description=itemDescription,
-                                 ProductCatagory=itemCategory)
+                                 ProductCatagory=itemCategory,
+                                 user_id=login_session['user_id'])
             session.add(addingItem)
             session.commit()
             return redirect(url_for('home'))
@@ -281,9 +317,8 @@ def addItem():
 
 # delete  item to a category
 @app.route('/EverythingStore/<category_name>/<item_name>/delete', methods=['GET', 'POST'])
+@login_required
 def deleteItem(category_name, item_name):
-    if 'username' not in login_session:
-        return redirect('/signin')
     #categories = session.query(ProductCatagory)
     deletingItemCategory = session.query(
                                         ProductCatagory
@@ -291,6 +326,9 @@ def deleteItem(category_name, item_name):
     deletingItem = session.query(
                                  Product
                                  ).filter_by(name=item_name).one()
+    creator = getUserInfo(deletingItem.user_id)
+    if deletingItem.user_id != creator:
+        return redirect('home')
     # Delete item from the database
     if request.method == 'POST':
         session.delete(deletingItem)
@@ -301,9 +339,8 @@ def deleteItem(category_name, item_name):
 
 # Edit  item to a category
 @app.route('/EverythingStore/<category_name>/<item_name>/edit', methods=['GET', 'POST'])
+@login_required
 def editItem(category_name, item_name):
-    if 'username' not in login_session:
-        return redirect('/signin')
     categories = session.query(ProductCatagory)
     editingItemCategory = session.query(
                                         ProductCatagory
@@ -313,6 +350,9 @@ def editItem(category_name, item_name):
                                 ).filter_by(
                                             name=item_name, ProductCatagory=editingItemCategory
                                             ).one()
+    creator = getUserInfo(editingItem.user_id)
+    if editingItem.user_id != creator:
+        return redirect('home')
     if request.method == 'POST':
         if request.form['name']:
             editingItem.name = request.form['name']

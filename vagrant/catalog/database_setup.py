@@ -9,6 +9,13 @@ import datetime
 Base = declarative_base()
 
 
+class User(Base):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False)
+
 class ProductCatagory(Base):
     __tablename__ = 'ProductCatagory'
 
@@ -34,6 +41,8 @@ class Product(Base):
     #timestamp = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     ProductCatagory_id = Column(Integer, ForeignKey('ProductCatagory.id'))
     ProductCatagory = relationship(ProductCatagory)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user = relationship(User)
 
 
     @property

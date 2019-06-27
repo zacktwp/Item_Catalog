@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import ProductCatagory, Base, Product
+from database_setup import ProductCatagory, Base, Product, User
 
 engine = create_engine('sqlite:///Product.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -18,6 +18,8 @@ DBSession = sessionmaker(bind=engine)
 # session.rollback()
 session = DBSession()
 
+user1 = User(name="zack peterson", email="zacktwp@gmail.com")
+
 # Products for Groceries
 ProductCatagory1 = ProductCatagory(name="Groceries")
 
@@ -25,7 +27,7 @@ session.add(ProductCatagory1)
 session.commit()
 
 Product2 = Product(name="Tuna", description="Delicious Blue Finn Tuna, extra Dolphin",
-                    price = "1.23", ProductCatagory=ProductCatagory1)
+                    price = "1.23", ProductCatagory=ProductCatagory1,user=user1)
 session.add(Product2)
 session.commit()
 
@@ -36,7 +38,7 @@ session.add(ProductCatagory2)
 session.commit()
 
 Product2 = Product(name="Mop", description="cleans the toughest staines",
-                    price = "1.23", ProductCatagory=ProductCatagory2)
+                    price = "1.23", ProductCatagory=ProductCatagory2,user=user1)
 session.add(Product2)
 session.commit()
 
