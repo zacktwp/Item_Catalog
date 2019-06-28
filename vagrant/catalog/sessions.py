@@ -3,8 +3,8 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, ProductCatagory, Product
 
 engine = create_engine('sqlite:///Product.db')
-Base.metadata.bind=engine
-DBSession = sessionmaker(bind = engine)
+Base.metadata.bind = engine
+DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 # Below written queries have to be run by copping them into the git bash
