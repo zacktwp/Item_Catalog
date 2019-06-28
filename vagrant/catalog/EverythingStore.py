@@ -204,6 +204,14 @@ def EverythingStoreJSON():
                    Items=[i.serialize for i in items])
 
 
+### API endpoints for all items from a specific category
+@app.route('/EverythingStore/<category_name>/items/json')
+def itemsJSON(category_name):
+    category = session.query(ProductCatagory).filter_by(name=category_name).one()
+    items = session.query(Product).filter_by(ProductCatagory=category).all()
+    return jsonify(Items = [i.serialize for i in items])
+
+
 # Everything Store home page
 @app.route('/')
 @app.route('/EverythingStore/')
