@@ -223,16 +223,16 @@ def allCategory(category_name):
         categories = session.query(
                                    ProductCatagory
                                    ).order_by(asc(ProductCatagory.name))
-        selectedCategory = session.query(
-                                         ProductCatagory
-                                         ).filter_by(name=category_name).one()
+        selectedCat = session.query(
+                                    ProductCatagory
+                                    ).filter_by(name=category_name).one()
         items = session.query(
                               Product
                               ).filter_by(
-                                          ProductCatagory_id=selectedCategory.id
+                                          ProductCatagory_id=selectedCat.id
                                           ).order_by(asc(Product.name))
         return render_template('home.html', categories=categories,
-                               selectedCategory=selectedCategory, items=items)
+                               selectedCategory=selectedCat, items=items)
     except exc.SQLAlchemyError:
         return '<h1>database error...re-try</h1>'
 
@@ -240,13 +240,13 @@ def allCategory(category_name):
 @app.route('/EverythingStore/<category_name>/<item_name>')
 def ProdDesc(category_name, item_name):
     try:
-        category = session.query(
-                                 ProductCatagory
-                                 ).filter_by(name=category_name).one()
+        cat = session.query(
+                            ProductCatagory
+                            ).filter_by(name=category_name).one()
         item = session.query(
                              Product
                              ).filter_by(
-                                         name=item_name, ProductCatagory=category
+                                         name=item_name, ProductCatagory=cat
                                          ).one()
         return render_template('description.html', item=item)
     except exc.SQLAlchemyError:
@@ -294,17 +294,16 @@ def addItem():
     if request.method == 'POST':
         itemName = request.form['name']
         itemDescription = request.form['description']
-        itemCategory = session.query(
-                                     ProductCatagory
-                                     ).filter_by(
-                                                 name=request.form['ProductCatagory']
-                                                 ).one()
-        #itemUser = login_session['user_id']
+        itCat = session.query(
+                              ProductCatagory
+                              ).filter_by(
+                                          name=request.form['ProductCatagory']
+                                          ).one()
         if itemName != '':
             print("item name %s" % itemName)
             addingItem = Product(name=itemName,
                                  description=itemDescription,
-                                 ProductCatagory=itemCategory,
+                                 ProductCatagory=itCat,
                                  user_id=login_session['user_id'])
             session.add(addingItem)
             session.commit()
@@ -316,10 +315,10 @@ def addItem():
 
 
 # delete  item to a category
-@app.route('/EverythingStore/<category_name>/<item_name>/delete', methods=['GET', 'POST'])
+@app.route('/EverythingStore/<category_name>/<item_name>/delete',
+           methods=['GET', 'POST'])
 @login_required
 def deleteItem(category_name, item_name):
-    #categories = session.query(ProductCatagory)
     deletingItemCategory = session.query(
                                         ProductCatagory
                                         ).filter_by(name=category_name).one()
@@ -334,43 +333,40 @@ def deleteItem(category_name, item_name):
         session.delete(deletingItem)
         session.commit()
         return redirect(url_for('home'))
-    return render_template('deleteItem.html', item=deletingItem, category_name=deletingItemCategory )
+    return render_template('deleteItem.html', item=deletingItem,
+                           category_name=deletingItemCategory)
 
 
 # Edit  item to a category
-@app.route('/EverythingStore/<category_name>/<item_name>/edit', methods=['GET', 'POST'])
+@app.route('/EverythingStore/<category_name>/<item_name>/edit',
+           methods=['GET', 'POST'])
 @login_required
 def editItem(category_name, item_name):
     categories = session.query(ProductCatagory)
-    editingItemCategory = session.query(
-                                        ProductCatagory
-                                        ).filter_by(name=category_name).one()
-    editingItem = session.query(
-                                Product
-                                ).filter_by(
-                                            name=item_name, ProductCatagory=editingItemCategory
-                                            ).one()
-    creator = getUserInfo(editingItem.user_id)
-    if editingItem.user_id != creator:
+    editItCat = session.query(
+                              ProductCatagory
+                              ).filter_by(name=category_name).one()
+    edIt = session.query(
+                         Product
+                         ).filter_by(
+                                     name=item_name, ProductCatagory=editItCat
+                                     ).one()
+    creator = getUserInfo(edIt.user_id)
+    if edIt.user_id != creator:
         return redirect('home')
     if request.method == 'POST':
         if request.form['name']:
-            editingItem.name = request.form['name']
+            edIt.name = request.form['name']
         if request.form['description']:
-            editingItem.description = request.form['description']
-        if request.form['ProductCatagory']:
-            editingItem.category = session.query(
-                                                 ProductCatagory
-                                                 ).filter_by(
-                                                             name=request.form['ProductCatagory']
-                                                             ).one()
-        session.add(editingItem)
+            edIt.description = request.form['description']
+
+        session.add(edIt)
         session.commit()
-        return redirect(url_for('ProdDesc', category_name=editingItemCategory.name,
-                                item_name=editingItem.name))
+        return redirect(url_for('ProdDesc', category_name=editItCat.name,
+                                item_name=edIt.name))
     else:
         return render_template('editItem.html', categories=categories,
-                               editingItemCategory=editingItemCategory, item=editingItem)
+                               editingItemCategory=editItCat, item=edIt)
 
 
 if __name__ == '__main__':

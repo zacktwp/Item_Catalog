@@ -26,8 +26,9 @@ ProductCatagory1 = ProductCatagory(name="Groceries")
 session.add(ProductCatagory1)
 session.commit()
 
-Product2 = Product(name="Tuna", description="Delicious Blue Finn Tuna, extra Dolphin",
-                    price = "1.23", ProductCatagory=ProductCatagory1,user=user1)
+Product2 = Product(name="Tuna",
+                   description="Delicious Blue Finn Tuna, extra Dolphin",
+                   price="1.23", ProductCatagory=ProductCatagory1, user=user1)
 session.add(Product2)
 session.commit()
 
@@ -38,10 +39,8 @@ session.add(ProductCatagory2)
 session.commit()
 
 Product2 = Product(name="Mop", description="cleans the toughest staines",
-                    price = "1.23", ProductCatagory=ProductCatagory2,user=user1)
+                   price="1.23",
+                   ProductCatagory=ProductCatagory2, user=user1)
 session.add(Product2)
 session.commit()
-
-
-
 print ("added products to DB!")
